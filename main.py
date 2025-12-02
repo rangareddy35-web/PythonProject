@@ -119,3 +119,9 @@ def book_appointment(payload: AppointmentRequest):
     save_appointments(appts)
 
     return {"status": "booked", "appointment": appt}
+
+@app.get("/appointments")
+def get_all_appointments():
+    """Retrieve all booked appointments."""
+    appts = load_appointments()
+    return {"status": "success", "total": len(appts), "appointments": appts}
