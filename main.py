@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import datetime
@@ -61,40 +61,6 @@ class AppointmentRequest(BaseModel):
             return v
         except Exception:
             raise ValueError("requested_datetime must be a valid ISO 8601 datetime string")
-
-@app.get("/health")
-def health_check():
-    """Health check endpoint for deployment monitoring."""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
-
-@app.get("/")
-def home():
-    return {"message": "API is live!"}
-
-@app.post("/test")
-def test(data: dict):
-    return {"received": data}
-
-@app.post("/retell-webhook")
-async def retell_webhook(request: Request):
-    data = await request.json()
-    print("Received from Retell:", data)
-    return {"status": "received"}
-
-@app.get("/availability")
-def check_availability(requested_datetime: str):
-    """Check whether the exact requested_datetime slot is free. Expects ISO 8601 datetime string."""
-    try:
-        req_dt = datetime.fromisoformat(requested_datetime)
-    except Exception:
-        logger.error(f"Invalid datetime format: {requested_datetime}")
-        raise HTTPException(status_code=400, detail="requested_datetime must be a valid ISO 8601 datetime")
-
-    appts = load_appointments()
-    for a in appts:
-        if a.get("requested_datetime") == req_dt.isoformat():
-            return {"available": False, "reason": "Slot already booked"}
-    return {"available": True}
 
 @app.post("/book-appointment")
 def book_appointment(payload: AppointmentRequest):
