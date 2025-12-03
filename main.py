@@ -62,7 +62,7 @@ class AppointmentRequest(BaseModel):
         except Exception:
             raise ValueError("requested_datetime must be a valid ISO 8601 datetime string")
 
-@app.post("/book-appointment ")
+@app.post("/book-appointment")
 def book_appointment(payload: AppointmentRequest):
     """Endpoint that collects appointment fields. If some required fields are missing, returns which fields to ask for next.
     Required fields: first_name, last_name, dob, insurance_provider, reason, requested_datetime
