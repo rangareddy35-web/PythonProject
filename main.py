@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 import uuid
@@ -62,19 +62,16 @@ class AppointmentRequest(BaseModel):
         except Exception:
             raise ValueError("requested_datetime must be a valid ISO 8601 datetime string")
 
-@app.post("/book-appointment")
+@app.post("/book- ")
 def book_appointment(payload: AppointmentRequest):
     """Endpoint that collects appointment fields. If some required fields are missing, returns which fields to ask for next.
     Required fields: first_name, last_name, dob, insurance_provider, reason, requested_datetime
     When all are present, checks availability and books if free."""
     try:
-        data = payload.dict()
-        required = ["first_name", "last_name", "dob", "insurance_provider", "reason", "requested_datetime"]
-        missing = [f for f in required if not data.get(f)]
-        if missing:
-            return {"status": "incomplete", "missing_fields": missing, "message": "Please provide the missing fields."}
-
-        # All fields present: validate datetime and check availability
+        data = payload.model_dump()
+        logger.info("Received booking request from Retell Payload=%s", data)
+        # All fields are now guaranteed to be present due to Pydantic validation
+        # Validate datetime and check availability
         try:
             req_dt = datetime.fromisoformat(data["requested_datetime"])
         except Exception:
@@ -95,13 +92,15 @@ def book_appointment(payload: AppointmentRequest):
             "insurance_provider": data["insurance_provider"],
             "reason": data["reason"],
             "requested_datetime": req_dt.isoformat(),
-            "created_at": datetime.utcnow().isoformat() + "Z"
+            "created_at": datetime.now().isoformat() + "Z"
         }
         appts.append(appt)
         save_appointments(appts)
         logger.info(f"Appointment booked: {appt['id']}")
 
         return {"status": "booked", "appointment": appt}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error booking appointment: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
