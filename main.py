@@ -15,6 +15,7 @@ app = FastAPI(title="Appointment Booking API", version="1.0.0")
 
 # Use environment variable for file path to support different deployment environments
 APPOINTMENTS_FILE = os.getenv("APPOINTMENTS_FILE", "appointments.json")
+DOCTORS_SLOTS_FILE = os.getenv("DOCTORS_SLOTS_FILE", "doctors_slots.json")
 
 # Helper functions to persist appointments simply in a JSON file
 def load_appointments() -> List[dict]:
@@ -29,6 +30,17 @@ def load_appointments() -> List[dict]:
 def save_appointments(appts: List[dict]):
     with open(APPOINTMENTS_FILE, "w", encoding="utf-8") as f:
         json.dump(appts, f, indent=2)
+
+def load_doctors_slots() -> dict:
+    """Load doctors and available slots from JSON file."""
+    if not os.path.exists(DOCTORS_SLOTS_FILE):
+        return {"doctors": []}
+    try:
+        with open(DOCTORS_SLOTS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        logger.error(f"Error loading doctors slots from {DOCTORS_SLOTS_FILE}")
+        return {"doctors": []}
 
 class AppointmentRequest(BaseModel):
     first_name: Optional[str] = None
@@ -114,3 +126,62 @@ def get_all_appointments():
     except Exception as e:
         logger.error(f"Error retrieving appointments: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/available-slots")
+def get_available_slots(department: Optional[str] = None):
+    """
+    Endpoint that provides available slots for doctors across various departments.
+
+    Query Parameters:
+    - department (optional): Filter by specific department (e.g., 'Cardiology', 'Neurology')
+
+    Returns:
+    - List of doctors with their available time slots
+    - Only slots with status 'available' are returned
+    """
+    try:
+        logger.info(f"Fetching available slots. Filter by department: {department}")
+
+        doctors_data = load_doctors_slots()
+        doctors = doctors_data.get("doctors", [])
+
+        # Filter by department if provided
+        if department:
+            doctors = [doc for doc in doctors if doc.get("department", "").lower() == department.lower()]
+            if not doctors:
+                return {
+                    "status": "not_found",
+                    "message": f"No doctors found in {department} department",
+                    "doctors": []
+                }
+
+        # Process doctors and filter only available slots
+        result_doctors = []
+        for doctor in doctors:
+            available_slots = [
+                slot for slot in doctor.get("available_slots", [])
+                if slot.get("status") == "available"
+            ]
+
+            if available_slots:  # Only include doctors with available slots
+                result_doctors.append({
+                    "id": doctor.get("id"),
+                    "name": doctor.get("name"),
+                    "department": doctor.get("department"),
+                    "specialization": doctor.get("specialization"),
+                    "experience": doctor.get("experience"),
+                    "available_slots": available_slots,
+                    "available_slots_count": len(available_slots)
+                })
+
+        return {
+            "status": "success",
+            "filter_department": department,
+            "total_doctors": len(result_doctors),
+            "doctors": result_doctors
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching available slots: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
