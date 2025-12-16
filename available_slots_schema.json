@@ -1,0 +1,383 @@
+t{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Available Slots Response Schema",
+  "description": "JSON schema for the /available-slots endpoint response",
+  "definitions": {
+    "AvailableSlot": {
+      "type": "object",
+      "description": "A single available appointment slot",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Appointment date in YYYY-MM-DD format",
+          "example": "2025-12-18"
+        },
+        "time": {
+          "type": "string",
+          "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Appointment time in HH:MM format (24-hour)",
+          "example": "09:00"
+        },
+        "duration_minutes": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 480,
+          "description": "Duration of the appointment slot in minutes",
+          "example": 30
+        },
+        "status": {
+          "type": "string",
+          "enum": ["available", "booked"],
+          "description": "Current status of the slot",
+          "example": "available"
+        }
+      },
+      "required": ["date", "time", "duration_minutes", "status"],
+      "additionalProperties": false
+    },
+    "Doctor": {
+      "type": "object",
+      "description": "Doctor information with available slots",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^doc[0-9]{3}$",
+          "description": "Unique identifier for the doctor",
+          "example": "doc001"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Full name of the doctor",
+          "example": "Dr. Sarah Johnson"
+        },
+        "department": {
+          "type": "string",
+          "enum": [
+            "Cardiology",
+            "Neurology",
+            "Orthopedics",
+            "Dermatology",
+            "General Medicine",
+            "Pediatrics"
+          ],
+          "description": "Medical department of the doctor",
+          "example": "Cardiology"
+        },
+        "specialization": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 150,
+          "description": "Doctor's area of specialization",
+          "example": "Heart & Cardiovascular"
+        },
+        "experience": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Years of experience of the doctor",
+          "example": 12
+        },
+        "available_slots_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of available slots for this doctor",
+          "example": 4
+        },
+        "available_slots": {
+          "type": "array",
+          "description": "List of available appointment slots",
+          "items": {
+            "$ref": "#/definitions/AvailableSlot"
+          },
+          "minItems": 0,
+          "example": [
+            {
+              "date": "2025-12-18",
+              "time": "09:00",
+              "duration_minutes": 30,
+              "status": "available"
+            },
+            {
+              "date": "2025-12-18",
+              "time": "09:30",
+              "duration_minutes": 30,
+              "status": "available"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "department",
+        "specialization",
+        "experience",
+        "available_slots_count",
+        "available_slots"
+      ],
+      "additionalProperties": false
+    },
+    "SuccessResponse": {
+      "type": "object",
+      "description": "Successful response from /available-slots endpoint",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["success"],
+          "description": "Response status indicator",
+          "example": "success"
+        },
+        "filter_department": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Cardiology",
+                "Neurology",
+                "Orthopedics",
+                "Dermatology",
+                "General Medicine",
+                "Pediatrics"
+              ],
+              "description": "Department filter that was applied"
+            },
+            {
+              "type": "null",
+              "description": "No department filter was applied"
+            }
+          ],
+          "example": null
+        },
+        "total_doctors": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of doctors returned",
+          "example": 6
+        },
+        "doctors": {
+          "type": "array",
+          "description": "List of doctors with available slots",
+          "items": {
+            "$ref": "#/definitions/Doctor"
+          },
+          "minItems": 0,
+          "example": [
+            {
+              "id": "doc001",
+              "name": "Dr. Sarah Johnson",
+              "department": "Cardiology",
+              "specialization": "Heart & Cardiovascular",
+              "experience": 12,
+              "available_slots_count": 4,
+              "available_slots": [
+                {
+                  "date": "2025-12-18",
+                  "time": "09:00",
+                  "duration_minutes": 30,
+                  "status": "available"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "required": ["status", "filter_department", "total_doctors", "doctors"],
+      "additionalProperties": false
+    },
+    "NotFoundResponse": {
+      "type": "object",
+      "description": "Response when requested department not found",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["not_found"],
+          "description": "Response status indicator",
+          "example": "not_found"
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message describing why no doctors were found",
+          "example": "No doctors found in Surgery department"
+        },
+        "doctors": {
+          "type": "array",
+          "description": "Empty array when no doctors found",
+          "items": {},
+          "maxItems": 0,
+          "example": []
+        }
+      },
+      "required": ["status", "message", "doctors"],
+      "additionalProperties": false
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "description": "Error response from server",
+      "properties": {
+        "detail": {
+          "type": "string",
+          "description": "Error message",
+          "example": "Internal server error"
+        }
+      },
+      "required": ["detail"],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/SuccessResponse",
+      "description": "Success response with doctors and slots"
+    },
+    {
+      "$ref": "#/definitions/NotFoundResponse",
+      "description": "Response when department filter returns no results"
+    },
+    {
+      "$ref": "#/definitions/ErrorResponse",
+      "description": "Server error response"
+    }
+  ],
+  "examples": {
+    "SuccessAllDoctors": {
+      "description": "Successful response with all doctors",
+      "value": {
+        "status": "success",
+        "filter_department": null,
+        "total_doctors": 6,
+        "doctors": [
+          {
+            "id": "doc001",
+            "name": "Dr. Sarah Johnson",
+            "department": "Cardiology",
+            "specialization": "Heart & Cardiovascular",
+            "experience": 12,
+            "available_slots_count": 4,
+            "available_slots": [
+              {
+                "date": "2025-12-18",
+                "time": "09:00",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-18",
+                "time": "09:30",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-18",
+                "time": "14:00",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-19",
+                "time": "09:00",
+                "duration_minutes": 30,
+                "status": "available"
+              }
+            ]
+          },
+          {
+            "id": "doc002",
+            "name": "Dr. Rajesh Kumar",
+            "department": "Neurology",
+            "specialization": "Neurological Disorders",
+            "experience": 15,
+            "available_slots_count": 4,
+            "available_slots": [
+              {
+                "date": "2025-12-18",
+                "time": "10:00",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-18",
+                "time": "10:30",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-19",
+                "time": "09:30",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-19",
+                "time": "14:00",
+                "duration_minutes": 30,
+                "status": "available"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "SuccessDepartmentFilter": {
+      "description": "Successful response with department filter",
+      "value": {
+        "status": "success",
+        "filter_department": "Cardiology",
+        "total_doctors": 1,
+        "doctors": [
+          {
+            "id": "doc001",
+            "name": "Dr. Sarah Johnson",
+            "department": "Cardiology",
+            "specialization": "Heart & Cardiovascular",
+            "experience": 12,
+            "available_slots_count": 4,
+            "available_slots": [
+              {
+                "date": "2025-12-18",
+                "time": "09:00",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-18",
+                "time": "09:30",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-18",
+                "time": "14:00",
+                "duration_minutes": 30,
+                "status": "available"
+              },
+              {
+                "date": "2025-12-19",
+                "time": "09:00",
+                "duration_minutes": 30,
+                "status": "available"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "NotFoundDepartment": {
+      "description": "Response when department not found",
+      "value": {
+        "status": "not_found",
+        "message": "No doctors found in Surgery department",
+        "doctors": []
+      }
+    },
+    "ServerError": {
+      "description": "Server error response",
+      "value": {
+        "detail": "Internal server error"
+      }
+    }
+  }
+}
+
