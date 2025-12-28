@@ -1,239 +1,281 @@
-You are a senior python developer with expertise in writing clear and concise documentation. Your task is to create a README.md file for a Python project that provides an overview of the project, installation instructions, usage examples, and contribution guidelines.
-# Project Title
-MyPythonProject
-# MyPythonProject
-MyPythonProject is a Python library designed to simplify data processing tasks. It provides a set of tools and utilities to help developers efficiently manipulate and analyze data.
+# Appointment Booking System
+
+A production-grade FastAPI application for managing hospital appointments, doctors, and patients with PostgreSQL database.
+
 ## Features
-- Easy-to-use functions for data cleaning and transformation
-- Support for various data formats (CSV, JSON, Excel)
-- Integration with popular data analysis libraries like Pandas and NumPy
-- Comprehensive documentation and examples
-- Active community support
-- Modular design for easy extension
-- High performance and optimized for large datasets
-- Cross-platform compatibility
-- Regular updates and maintenance
-- Open-source and free to use
+
+- **RESTful API** - Versioned API (v1) with comprehensive endpoints
+- **Database** - PostgreSQL with SQLAlchemy ORM
+- **Modular Architecture** - Clean separation of concerns
+- **Migrations** - Alembic-based database versioning
+- **Exception Handling** - Custom exceptions and error handlers
+- **Audit Logging** - Track all appointment operations
+
+## Directory Structure
+
+```
+.
+├── alembic/                    # Database migrations
+├── app/
+│   ├── api/v1/                 # API v1 endpoints
+│   │   ├── endpoints/          # Individual endpoint files
+│   │   └── api.py              # Router configuration
+│   ├── core/                   # Configuration and settings
+│   ├── db/                     # Database session and connection
+│   ├── models/                 # SQLAlchemy ORM models
+│   ├── repositories/           # Data access layer (repository pattern)
+│   ├── schemas/                # Pydantic schemas (request/response)
+│   ├── services/               # Business logic layer
+│   ├── exceptions/             # Custom exceptions and handlers
+│   └── main.py                 # FastAPI application factory
+├── scripts/                    # Utility scripts
+├── tests/                      # Test suites
+├── main.py                     # Application entry point
+├── requirements.txt            # Python dependencies
+└── .env                        # Environment variables (git ignored)
+```
+
 ## Installation
-You can install MyPythonProject using pip. Run the following command in your terminal:
+
+### Prerequisites
+- Python 3.9+
+- PostgreSQL 12+
+- Git
+
+### Setup Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd PythonProject
+   ```
+
+2. **Create and activate virtual environment**
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate  # Windows
+   source .venv/bin/activate  # Linux/Mac
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
+
+## Database Setup
+
+### Option 1: Docker (Recommended)
 ```bash
-pip install -r requirements.txt
-```
-## Usage
-This application is a booking management system. Below are the available endpoints:
-
-### 1. **POST /booking-appointments**
-This endpoint allows users to book appointments. You can send a POST request with the necessary details to schedule an appointment.
-
-**Request Body:**
-```json
-{
-  "first_name": "John",
-  "last_name": "Doe",
-  "dob": "1990-05-20",
-  "insurance_provider": "HealthOne",
-  "reason": "Consultation",
-  "requested_datetime": "2025-12-18T10:00:00"
-}
+docker-compose up -d
 ```
 
-**Response (Success):**
-```json
-{
-  "status": "booked",
-  "appointment": {
-    "id": "587b3127-bc21-40c4-9efe-7969ec46aeef",
-    "first_name": "John",
-    "last_name": "Doe",
-    "dob": "1990-05-20",
-    "insurance_provider": "HealthOne",
-    "reason": "Consultation",
-    "requested_datetime": "2025-12-18T10:00:00",
-    "created_at": "2025-12-17T14:30:00Z"
-  }
-}
+### Option 2: Local PostgreSQL
+```sql
+CREATE DATABASE appointment_db;
+CREATE USER appointment_user WITH PASSWORD 'secure_password';
+ALTER ROLE appointment_user SET client_encoding TO 'utf8';
+ALTER ROLE appointment_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE appointment_user SET default_transaction_deferrable TO on;
+ALTER ROLE appointment_user SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE appointment_db TO appointment_user;
 ```
 
-### 2. **GET /appointments**
-This endpoint retrieves a list of all booked appointments. You can send a GET request to fetch the appointment data.
-
-**Response:**
-```json
-{
-  "status": "success",
-  "total": 5,
-  "appointments": [
-    {
-      "id": "587b3127-bc21-40c4-9efe-7969ec46aeef",
-      "first_name": "John",
-      "last_name": "Doe",
-      "dob": "1990-05-20",
-      "insurance_provider": "HealthOne",
-      "reason": "Consultation",
-      "requested_datetime": "2025-12-18T10:00:00",
-      "created_at": "2025-12-17T14:30:00Z"
-    }
-  ]
-}
-```
-
-### 3. **GET /available-slots** ✨ NEW
-This endpoint provides information about available time slots for doctors across various departments. You can send a GET request with an optional department filter.
-
-**Query Parameters:**
-- `department` (optional): Filter by specific department. Example: "Cardiology", "Neurology", "Pediatrics", "Dermatology", "Orthopedics", "General Medicine"
-
-**Example Requests:**
-
-Get all available slots across all departments:
+### Initialize Database Schema
 ```bash
-GET /available-slots
+python scripts/setup_db.py
 ```
 
-Get available slots for a specific department:
+Or run Alembic migrations:
 ```bash
-GET /available-slots?department=Cardiology
+alembic upgrade head
 ```
 
-**Response (All Doctors):**
-```json
-{
-  "status": "success",
-  "filter_department": null,
-  "total_doctors": 6,
-  "doctors": [
-    {
-      "id": "doc001",
-      "name": "Dr. Sarah Johnson",
-      "department": "Cardiology",
-      "specialization": "Heart & Cardiovascular",
-      "experience": 12,
-      "available_slots_count": 4,
-      "available_slots": [
-        {
-          "date": "2025-12-18",
-          "time": "09:00",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-18",
-          "time": "09:30",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-18",
-          "time": "14:00",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-19",
-          "time": "09:00",
-          "duration_minutes": 30,
-          "status": "available"
-        }
-      ]
-    },
-    {
-      "id": "doc002",
-      "name": "Dr. Rajesh Kumar",
-      "department": "Neurology",
-      "specialization": "Neurological Disorders",
-      "experience": 15,
-      "available_slots_count": 4,
-      "available_slots": [
-        {
-          "date": "2025-12-18",
-          "time": "10:00",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-18",
-          "time": "10:30",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-19",
-          "time": "09:30",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-19",
-          "time": "14:00",
-          "duration_minutes": 30,
-          "status": "available"
-        }
-      ]
-    }
-  ]
-}
+## Running the Application
+
+```bash
+python main.py
 ```
 
-**Response (Department Filter):**
-```json
-{
-  "status": "success",
-  "filter_department": "Cardiology",
-  "total_doctors": 1,
-  "doctors": [
-    {
-      "id": "doc001",
-      "name": "Dr. Sarah Johnson",
-      "department": "Cardiology",
-      "specialization": "Heart & Cardiovascular",
-      "experience": 12,
-      "available_slots_count": 4,
-      "available_slots": [
-        {
-          "date": "2025-12-18",
-          "time": "09:00",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-18",
-          "time": "09:30",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-18",
-          "time": "14:00",
-          "duration_minutes": 30,
-          "status": "available"
-        },
-        {
-          "date": "2025-12-19",
-          "time": "09:00",
-          "duration_minutes": 30,
-          "status": "available"
-        }
-      ]
-    }
-  ]
-}
+**Application will be available at:**
+- API: `http://localhost:8000`
+- Swagger Docs: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+- Health Check: `http://localhost:8000/api/v1/health`
+
+## Database Schema
+
+### Core Tables
+
+**doctors**
+- id (String, PK)
+- name, email, phone
+- department, specialization, experience
+- is_active, created_at, updated_at
+
+**patients**
+- id (UUID, PK)
+- first_name, last_name, email, phone
+- dob, insurance_provider, insurance_id
+- is_active, created_at, updated_at
+
+**available_slots**
+- id (UUID, PK)
+- doctor_id (FK → doctors)
+- date, time, duration_minutes
+- status (available/booked)
+- created_at, updated_at
+
+**appointments**
+- id (UUID, PK)
+- patient_id (FK → patients)
+- doctor_id (FK → doctors)
+- slot_id (FK → available_slots)
+- reason, status, requested_datetime
+- created_at, updated_at
+
+**audit_logs**
+- id (UUID, PK)
+- action, appointment_id, timestamp
+- user_id, details, status
+
+### Indexes
+- `idx_doctor_date_time` - available_slots(doctor_id, date, time)
+- `idx_status_date` - available_slots(status, date)
+- `idx_patient_status` - appointments(patient_id, status)
+- `idx_doctor_status` - appointments(doctor_id, status)
+
+## API Endpoints
+
+### Health
+- `GET /api/v1/health` - Health check
+
+### Doctors
+- `GET /api/v1/doctors` - List all doctors
+- `GET /api/v1/doctors/{doctor_id}` - Get doctor details
+
+### Patients
+- `POST /api/v1/patients` - Create new patient
+- `GET /api/v1/patients` - List all patients
+
+### Available Slots
+- `GET /api/v1/available-slots` - List available slots
+- `GET /api/v1/doctors/{doctor_id}/available-slots` - Slots by doctor
+
+### Appointments
+- `POST /api/v1/book-appointment` - Book appointment
+- `GET /api/v1/appointments` - List all appointments
+- `GET /api/v1/appointments/{appointment_id}` - Get appointment details
+- `POST /api/v1/cancel-appointment` - Cancel appointment
+
+## Project Architecture
+
+### Layers
+
+**API Layer** (`app/api/`)
+- Defines routes and endpoint handlers
+- Input validation via Pydantic schemas
+- Response formatting
+
+**Service Layer** (`app/services/`)
+- Business logic and workflows
+- Orchestrates repositories
+- External service integration
+- Error handling
+
+**Repository Layer** (`app/repositories/`)
+- Data access patterns
+- Query optimization
+- Business rule enforcement
+- Transaction management
+
+**Model Layer** (`app/models/`)
+- SQLAlchemy ORM models
+- Relationships and constraints
+- Enum types for statuses
+
+**Schema Layer** (`app/schemas/`)
+- Pydantic models for validation
+- Request/response structures
+- Field validation rules
+
+**Exception Layer** (`app/exceptions/`)
+- Custom exception classes
+- Global exception handlers
+- Error response formatting
+
+## Testing
+
+Run integration tests:
+```bash
+pytest tests/integration/test_api.py -v
 ```
 
-**Available Departments:**
-- Cardiology
-- Neurology
-- Orthopedics
-- Dermatology
-- General Medicine
-- Pediatrics
+Run unit tests:
+```bash
+pytest tests/unit/ -v
+```
 
-## Data Files
+## Configuration
 
-### doctors_slots.json
-This file contains sample data for doctors and their available appointment slots across different departments. Each doctor entry includes:
-- Doctor ID and name
-- Department and specialization
-- Years of experience
-- List of available time slots with date, time, duration, and availability status
+Edit `.env` file to configure:
+```
+DATABASE_URL=postgresql://appointment_user:secure_password@localhost:5432/appointment_db
+PROJECT_NAME=Appointment Booking API
+API_V1_STR=/api/v1
+```
 
-The sample data includes 6 doctors across 6 different departments with various available slots throughout the week.
+## Development
+
+### Run with auto-reload
+```bash
+python main.py
+# or
+uvicorn app.main:app --reload
+```
+
+### Database Migrations
+Create a new migration:
+```bash
+alembic revision --autogenerate -m "description"
+```
+
+Apply migrations:
+```bash
+alembic upgrade head
+```
+
+Rollback:
+```bash
+alembic downgrade -1
+```
+
+## Error Handling
+
+The API provides comprehensive error responses:
+- `400` - Bad Request (validation error)
+- `404` - Not Found (resource not found)
+- `409` - Conflict (slot unavailable, double booking)
+- `500` - Internal Server Error
+
+## Performance
+
+Key optimizations:
+- Composite indexes on frequently queried columns
+- Database-level constraints for data integrity
+- Connection pooling
+- Efficient ORM queries with eager loading
+
+## Support
+
+For issues or questions, please open an issue in the repository.
+
+## License
+
+MIT License - see LICENSE file for details
+

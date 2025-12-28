@@ -1,0 +1,353 @@
+{
+  "bookAppointmentExamples": {
+    "example1_basicAppointment": {
+      "description": "Basic appointment booking with required fields only",
+      "request": {
+        "doctor_id": "doc001",
+        "first_name": "John",
+        "last_name": "Doe",
+        "dob": "1990-05-15",
+        "insurance_provider": "BlueCross",
+        "reason": "Annual checkup",
+        "requested_datetime": "2025-01-15T10:00:00"
+      },
+      "response_success": {
+        "status": "booked",
+        "appointment": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "doctor_id": "doc001",
+          "patient": {
+            "first_name": "John",
+            "last_name": "Doe"
+          },
+          "requested_datetime": "2025-01-15T10:00:00",
+          "created_at": "2025-12-28T14:30:00Z",
+          "status": "booked"
+        }
+      }
+    },
+    "example2_consultationAppointment": {
+      "description": "Consultation appointment with additional details",
+      "request": {
+        "doctor_id": "doc002",
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "dob": "1985-08-22",
+        "insurance_provider": "Aetna",
+        "insurance_id": "AET123456789",
+        "reason": "Cardiac consultation - follow up on ECG results",
+        "requested_datetime": "2025-01-20T14:30:00"
+      },
+      "response_success": {
+        "status": "booked",
+        "appointment": {
+          "id": "660e8400-e29b-41d4-a716-446655440001",
+          "doctor_id": "doc002",
+          "patient": {
+            "first_name": "Jane",
+            "last_name": "Smith",
+            "email": "jane.smith@email.com"
+          },
+          "reason": "Cardiac consultation - follow up on ECG results",
+          "requested_datetime": "2025-01-20T14:30:00",
+          "created_at": "2025-12-28T14:35:00Z",
+          "status": "booked"
+        }
+      }
+    },
+    "example3_emergencyAppointment": {
+      "description": "Emergency appointment booking with urgent reason",
+      "request": {
+        "doctor_id": "doc003",
+        "first_name": "Robert",
+        "last_name": "Johnson",
+        "dob": "1978-03-10",
+        "insurance_provider": "Medicare",
+        "insurance_id": "MED987654321",
+        "reason": "Severe headache and dizziness - urgent",
+        "requested_datetime": "2025-01-15T11:00:00"
+      },
+      "response_success": {
+        "status": "booked",
+        "appointment": {
+          "id": "770e8400-e29b-41d4-a716-446655440002",
+          "doctor_id": "doc003",
+          "patient": {
+            "first_name": "Robert",
+            "last_name": "Johnson"
+          },
+          "reason": "Severe headache and dizziness - urgent",
+          "requested_datetime": "2025-01-15T11:00:00",
+          "created_at": "2025-12-28T14:40:00Z",
+          "status": "booked",
+          "confirmation_number": "APT-20250115-001"
+        }
+      }
+    },
+    "example4_checkupAppointment": {
+      "description": "Regular checkup appointment",
+      "request": {
+        "doctor_id": "doc004",
+        "first_name": "Sarah",
+        "last_name": "Williams",
+        "dob": "1992-11-30",
+        "insurance_provider": "United Healthcare",
+        "reason": "Routine physical examination",
+        "requested_datetime": "2025-01-22T09:00:00"
+      },
+      "response_success": {
+        "status": "booked",
+        "appointment": {
+          "id": "880e8400-e29b-41d4-a716-446655440003",
+          "doctor_id": "doc004",
+          "patient": {
+            "first_name": "Sarah",
+            "last_name": "Williams"
+          },
+          "reason": "Routine physical examination",
+          "requested_datetime": "2025-01-22T09:00:00",
+          "created_at": "2025-12-28T14:45:00Z",
+          "status": "booked"
+        }
+      }
+    },
+    "example5_specialistAppointment": {
+      "description": "Specialist appointment with detailed reason",
+      "request": {
+        "doctor_id": "doc005",
+        "first_name": "Michael",
+        "last_name": "Brown",
+        "dob": "1988-07-18",
+        "insurance_provider": "Cigna",
+        "insurance_id": "CIG456789012",
+        "reason": "Dermatology consultation - skin condition evaluation",
+        "requested_datetime": "2025-01-25T15:30:00"
+      },
+      "response_success": {
+        "status": "booked",
+        "appointment": {
+          "id": "990e8400-e29b-41d4-a716-446655440004",
+          "doctor_id": "doc005",
+          "patient": {
+            "first_name": "Michael",
+            "last_name": "Brown"
+          },
+          "reason": "Dermatology consultation - skin condition evaluation",
+          "requested_datetime": "2025-01-25T15:30:00",
+          "created_at": "2025-12-28T14:50:00Z",
+          "status": "booked"
+      }
+    }
+  },
+  "requestSchema": {
+    "description": "Appointment booking request schema",
+    "type": "object",
+    "required": [
+      "doctor_id",
+      "first_name",
+      "last_name",
+      "dob",
+      "insurance_provider",
+      "reason",
+      "requested_datetime"
+    ],
+    "properties": {
+      "doctor_id": {
+        "type": "string",
+        "description": "Doctor ID (e.g., 'doc001')",
+        "example": "doc001",
+        "pattern": "^doc[0-9]+$"
+      },
+      "first_name": {
+        "type": "string",
+        "description": "Patient's first name",
+        "example": "John",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "last_name": {
+        "type": "string",
+        "description": "Patient's last name",
+        "example": "Doe",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "dob": {
+        "type": "string",
+        "format": "date",
+        "description": "Patient's date of birth in YYYY-MM-DD format",
+        "example": "1990-05-15"
+      },
+      "insurance_provider": {
+        "type": "string",
+        "description": "Insurance provider name",
+        "example": "BlueCross",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "insurance_id": {
+        "type": "string",
+        "description": "Insurance policy ID (optional)",
+        "example": "BC123456789",
+        "maxLength": 50
+      },
+      "reason": {
+        "type": "string",
+        "description": "Reason for appointment",
+        "example": "Annual checkup",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "requested_datetime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Requested appointment date and time in ISO 8601 format",
+        "example": "2025-01-15T10:00:00",
+        "note": "Should be in format: YYYY-MM-DDTHH:MM:SS"
+      }
+    }
+  },
+  "responseSchema": {
+    "description": "Successful appointment booking response",
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["booked", "pending", "cancelled"],
+        "description": "Appointment status",
+        "example": "booked"
+      },
+      "appointment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique appointment ID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "doctor_id": {
+            "type": "string",
+            "description": "Doctor ID",
+            "example": "doc001"
+          },
+          "patient": {
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string",
+                "example": "John"
+              },
+              "last_name": {
+                "type": "string",
+                "example": "Doe"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "john.doe@email.com"
+              }
+            }
+          },
+          "reason": {
+            "type": "string",
+            "example": "Annual checkup"
+          },
+          "requested_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-01-15T10:00:00"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the appointment was created",
+            "example": "2025-12-28T14:30:00Z"
+          },
+          "confirmation_number": {
+            "type": "string",
+            "description": "Unique confirmation number",
+            "example": "APT-20250115-001"
+          }
+        }
+      }
+    }
+  },
+  "errorResponses": {
+    "example1_slotUnavailable": {
+      "status": 409,
+      "response": {
+        "status": "error",
+        "message": "Slot is not available for the requested time",
+        "error_code": "SLOT_UNAVAILABLE",
+        "details": {
+          "doctor_id": "doc001",
+          "requested_datetime": "2025-01-15T10:00:00",
+          "suggestion": "Please check available slots for this doctor"
+        }
+      }
+    },
+    "example2_invalidInput": {
+      "status": 400,
+      "response": {
+        "status": "error",
+        "message": "Invalid input data",
+        "error_code": "VALIDATION_ERROR",
+        "details": {
+          "fields": {
+            "dob": "Invalid date format. Expected YYYY-MM-DD",
+            "requested_datetime": "Invalid datetime format. Expected ISO 8601"
+          }
+        }
+      }
+    },
+    "example3_doctorNotFound": {
+      "status": 404,
+      "response": {
+        "status": "error",
+        "message": "Doctor not found",
+        "error_code": "DOCTOR_NOT_FOUND",
+        "details": {
+          "doctor_id": "doc999"
+        }
+      }
+    },
+    "example4_pastDateTime": {
+      "status": 400,
+      "response": {
+        "status": "error",
+        "message": "Cannot book appointment for past date/time",
+        "error_code": "INVALID_DATETIME",
+        "details": {
+          "requested_datetime": "2025-01-15T10:00:00",
+          "current_datetime": "2025-12-28T14:30:00Z",
+          "message": "Appointment date/time must be in the future"
+        }
+      }
+    }
+  },
+  "curlExamples": {
+    "example1_basicBooking": {
+      "description": "Book appointment using curl",
+      "command": "curl -X POST http://localhost:8000/api/v1/book-appointment -H 'Content-Type: application/json' -d '{\"doctor_id\": \"doc001\", \"first_name\": \"John\", \"last_name\": \"Doe\", \"dob\": \"1990-05-15\", \"insurance_provider\": \"BlueCross\", \"reason\": \"Annual checkup\", \"requested_datetime\": \"2025-01-15T10:00:00\"}'"
+    },
+    "example2_powerShellBooking": {
+      "description": "Book appointment using PowerShell",
+      "command": "$body = @{doctor_id='doc001'; first_name='John'; last_name='Doe'; dob='1990-05-15'; insurance_provider='BlueCross'; reason='Annual checkup'; requested_datetime='2025-01-15T10:00:00'} | ConvertTo-Json; Invoke-WebRequest -Uri 'http://localhost:8000/api/v1/book-appointment' -Method POST -Body $body -ContentType 'application/json'"
+    },
+    "example3_pythonBooking": {
+      "description": "Book appointment using Python",
+      "code": "import requests\nimport json\n\nurl = 'http://localhost:8000/api/v1/book-appointment'\npayload = {\n    'doctor_id': 'doc001',\n    'first_name': 'John',\n    'last_name': 'Doe',\n    'dob': '1990-05-15',\n    'insurance_provider': 'BlueCross',\n    'reason': 'Annual checkup',\n    'requested_datetime': '2025-01-15T10:00:00'\n}\nheaders = {'Content-Type': 'application/json'}\n\nresponse = requests.post(url, json=payload, headers=headers)\nprint(response.json())"
+    }
+  },
+  "notes": {
+    "dateTimeFormat": "All dates must be in ISO 8601 format. Examples: '2025-01-15' for date, '2025-01-15T10:00:00' for datetime",
+    "doctorIds": "Valid doctor IDs: doc001, doc002, doc003, doc004, doc005 (these are created during database initialization)",
+    "slotAvailability": "Check available slots before booking to avoid conflicts",
+    "timezone": "Times are handled in the server's timezone. Check with API for timezone information",
+    "confirmation": "A confirmation number will be provided for every successful booking",
+    "cancellation": "Use the appointment ID to cancel appointments",
+    "insurance": "Insurance provider is required. Insurance ID is optional but recommended"
+  }
+}
+

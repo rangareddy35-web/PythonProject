@@ -1,0 +1,246 @@
+{
+  "info": {
+    "name": "Appointment Booking API",
+    "description": "Postman collection for testing appointment booking endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "health"]
+        },
+        "description": "Check if the API is running"
+      },
+      "response": []
+    },
+    {
+      "name": "Book Appointment - Basic",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"doctor_id\": \"doc001\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"dob\": \"1990-05-15\",\n  \"insurance_provider\": \"BlueCross\",\n  \"reason\": \"Annual checkup\",\n  \"requested_datetime\": \"2025-01-15T10:00:00\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/book-appointment",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "book-appointment"]
+        },
+        "description": "Book a basic appointment"
+      },
+      "response": []
+    },
+    {
+      "name": "Book Appointment - With Insurance ID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"doctor_id\": \"doc002\",\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"dob\": \"1985-08-22\",\n  \"insurance_provider\": \"Aetna\",\n  \"insurance_id\": \"AET123456789\",\n  \"reason\": \"Cardiac consultation - follow up on ECG results\",\n  \"requested_datetime\": \"2025-01-20T14:30:00\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/book-appointment",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "book-appointment"]
+        },
+        "description": "Book appointment with insurance details"
+      },
+      "response": []
+    },
+    {
+      "name": "Book Appointment - Emergency",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"doctor_id\": \"doc003\",\n  \"first_name\": \"Robert\",\n  \"last_name\": \"Johnson\",\n  \"dob\": \"1978-03-10\",\n  \"insurance_provider\": \"Medicare\",\n  \"insurance_id\": \"MED987654321\",\n  \"reason\": \"Severe headache and dizziness - urgent\",\n  \"requested_datetime\": \"2025-01-15T11:00:00\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/book-appointment",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "book-appointment"]
+        },
+        "description": "Book urgent appointment"
+      },
+      "response": []
+    },
+    {
+      "name": "Book Appointment - Routine Physical",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"doctor_id\": \"doc004\",\n  \"first_name\": \"Sarah\",\n  \"last_name\": \"Williams\",\n  \"dob\": \"1992-11-30\",\n  \"insurance_provider\": \"United Healthcare\",\n  \"reason\": \"Routine physical examination\",\n  \"requested_datetime\": \"2025-01-22T09:00:00\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/book-appointment",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "book-appointment"]
+        },
+        "description": "Book routine physical examination"
+      },
+      "response": []
+    },
+    {
+      "name": "Book Appointment - Specialist",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"doctor_id\": \"doc005\",\n  \"first_name\": \"Michael\",\n  \"last_name\": \"Brown\",\n  \"dob\": \"1988-07-18\",\n  \"insurance_provider\": \"Cigna\",\n  \"insurance_id\": \"CIG456789012\",\n  \"reason\": \"Dermatology consultation - skin condition evaluation\",\n  \"requested_datetime\": \"2025-01-25T15:30:00\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/book-appointment",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "book-appointment"]
+        },
+        "description": "Book specialist consultation"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Appointments",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/appointments",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "appointments"]
+        },
+        "description": "List all appointments"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Available Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/available-slots",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "available-slots"]
+        },
+        "description": "List all available slots"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Doctor Available Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/doctors/doc001/available-slots",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "doctors", "doc001", "available-slots"]
+        },
+        "description": "Get available slots for a specific doctor"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Doctors",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/doctors",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "doctors"]
+        },
+        "description": "List all doctors"
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel Appointment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"appointment_id\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/cancel-appointment",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "cancel-appointment"]
+        },
+        "description": "Cancel an appointment (replace appointment_id with actual UUID)"
+      },
+      "response": []
+    }
+  ]
+}
+
