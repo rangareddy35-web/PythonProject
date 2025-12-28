@@ -7,13 +7,23 @@ Backs up PostgreSQL schema and data to SQL file
 import psycopg2
 import os
 from datetime import datetime
+from urllib.parse import urlparse
+from dotenv import load_dotenv
 
-# Database connection details
-DB_HOST = "dpg-d58jgkogjchc73a744k0-a.virginia-postgres.render.com"
-DB_PORT = 5432
-DB_NAME = "ai_receptionist_3gp5"
-DB_USER = "ranga"
-DB_PASSWORD = "lQHuZjjAtYduMoYuAL6FSHTsBd75u3Qd"
+# Load environment variables
+load_dotenv()
+
+# Parse DATABASE_URL from environment
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable not set")
+
+parsed = urlparse(DATABASE_URL)
+DB_HOST = parsed.hostname
+DB_PORT = parsed.port or 5432
+DB_NAME = parsed.path[1:]  # Remove leading /
+DB_USER = parsed.username
+DB_PASSWORD = parsed.password
 
 def backup_database():
     """Create a complete database backup"""
