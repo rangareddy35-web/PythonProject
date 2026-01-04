@@ -7,7 +7,7 @@ from app.repositories.available_slot import AvailableSlotRepository
 from app.repositories.doctor import DoctorRepository
 from app.repositories.patient import PatientRepository
 from app.schemas.schemas import AppointmentRequest
-from app.exceptions.custom import SlotUnavailableException, AppointmentNotFoundException, PatientNotFoundException
+from app.exceptions.custom import SlotUnavailableException, AppointmentNotFoundException, PatientNotFoundException, AppError
 
 class AppointmentService:
     def __init__(self, db: Session):
@@ -16,22 +16,17 @@ class AppointmentService:
         self.slot_repo = AvailableSlotRepository(db)
         self.doctor_repo = DoctorRepository(db)
         self.patient_repo = PatientRepository(db)
-
     def book_appointment(self, payload: AppointmentRequest) -> dict:
         """Book an appointment logic"""
-        # 1. Create Patient
-        patient = self.patient_repo.create(
-            first_name=payload.first_name,
-            last_name=payload.last_name,
-            dob=payload.dob,
-            insurance_provider=payload.insurance_provider
-        )
+        # 1. Check if requested time is in the future
+        req_dt = datetime.fromisoformat(payload.requested_datetime)
+        if req_dt < datetime.now():
+            raise AppError(f"Cannot book appointment for past date/time: {payload.requested_datetime}", status_code=400)
 
         # 2. Find Slot
-        req_dt = datetime.fromisoformat(payload.requested_datetime)
         req_date = req_dt.date()
         req_time = req_dt.time()
-
+        
         selected_slot = None
         if payload.doctor_id:
             selected_slot = self.slot_repo.get_available_slots_by_date_and_time(
@@ -49,7 +44,15 @@ class AppointmentService:
         if not selected_slot:
             raise SlotUnavailableException(f"No slot available at {payload.requested_datetime}")
 
-        # 3. Book Slot & Create Appointment
+        # 3. Create Patient
+        patient = self.patient_repo.create(
+            first_name=payload.first_name,
+            last_name=payload.last_name,
+            dob=payload.dob,
+            insurance_provider=payload.insurance_provider
+        )
+
+        # 4. Book Slot & Create Appointment
         self.slot_repo.update_status(selected_slot.id, "booked")
         
         appointment = self.appointment_repo.create(
