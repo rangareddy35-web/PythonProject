@@ -16,7 +16,9 @@ def book_appointment(
 ):
     """Book an appointment."""
     service = AppointmentService(db)
-    result = service.book_appointment(payload, doctor_id=doctor_id)
+    # Prefer doctor_id from body, fallback to query param
+    effective_doctor_id = payload.doctor_id or doctor_id
+    result = service.book_appointment(payload, doctor_id=effective_doctor_id)
     return {"status": "booked", "appointment": result}
 
 @router.get("/appointments")
