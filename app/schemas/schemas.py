@@ -41,7 +41,6 @@ class Appointment(BaseModel):
     status: str = "booked" # booked, cancelled
 
 class AppointmentRequest(BaseModel):
-    doctor_id: Optional[str] = None
     first_name: str
     last_name: str
     dob: str

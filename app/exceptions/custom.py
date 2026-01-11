@@ -28,4 +28,5 @@ class DoctorNotFoundException(NotFoundError):
     pass
 
 class SlotUnavailableException(ConflictError):
-    pass
+    def __init__(self, message: str = "I'm sorry, but that slot is no longer available. Would you like to try another time?"):
+        super().__init__(message)

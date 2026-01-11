@@ -9,10 +9,14 @@ import uuid
 router = APIRouter()
 
 @router.post("/book-appointment")
-def book_appointment(payload: AppointmentRequest, db: Session = Depends(get_db)):
+def book_appointment(
+    payload: AppointmentRequest, 
+    doctor_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     """Book an appointment."""
     service = AppointmentService(db)
-    result = service.book_appointment(payload)
+    result = service.book_appointment(payload, doctor_id=doctor_id)
     return {"status": "booked", "appointment": result}
 
 @router.get("/appointments")

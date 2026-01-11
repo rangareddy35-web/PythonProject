@@ -16,21 +16,24 @@ class AppointmentService:
         self.slot_repo = AvailableSlotRepository(db)
         self.doctor_repo = DoctorRepository(db)
         self.patient_repo = PatientRepository(db)
-    def book_appointment(self, payload: AppointmentRequest) -> dict:
+    def book_appointment(self, payload: AppointmentRequest, doctor_id: Optional[str] = None) -> dict:
         """Book an appointment logic"""
         # 1. Check if requested time is in the future
         req_dt = datetime.fromisoformat(payload.requested_datetime)
         if req_dt < datetime.now():
-            raise AppError(f"Cannot book appointment for past date/time: {payload.requested_datetime}", status_code=400)
+            raise AppError(
+                f"I'm sorry, I can't book an appointment for a past date or time ({payload.requested_datetime}). Could you please suggest a future time?", 
+                status_code=400
+            )
 
         # 2. Find Slot
         req_date = req_dt.date()
         req_time = req_dt.time()
         
         selected_slot = None
-        if payload.doctor_id:
+        if doctor_id:
             selected_slot = self.slot_repo.get_available_slots_by_date_and_time(
-                payload.doctor_id, req_date, req_time
+                doctor_id, req_date, req_time
             )
         else:
             doctors = self.doctor_repo.get_all_active()
@@ -42,7 +45,7 @@ class AppointmentService:
                     break
         
         if not selected_slot:
-            raise SlotUnavailableException(f"No slot available at {payload.requested_datetime}")
+            raise SlotUnavailableException()
 
         # 3. Create Patient
         patient = self.patient_repo.create(
