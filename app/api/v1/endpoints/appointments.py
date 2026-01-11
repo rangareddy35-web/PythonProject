@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.db.session import get_db
 from app.services.appointment_service import AppointmentService
 from app.schemas.schemas import AppointmentRequest
