@@ -8,32 +8,51 @@ from app.schemas.schemas import Doctor as DoctorSchema
 router = APIRouter()
 
 @router.get("/doctors") #, response_model=List[DoctorSchema])
-def get_doctors(db: Session = Depends(get_db)):
-    """Get all doctors."""
+def get_doctors(
+    include_slots: bool = False,
+    slot_limit: int = 5,
+    specialization: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all doctors with optional slot inclusion and specialization filtering."""
     service = DoctorService(db)
-    doctors = service.get_all_active_doctors()
-    # Manual serialization again to match required output format if Schema differs
+    doctors_data = service.get_all_active_doctors(
+        include_slots=include_slots, 
+        slot_limit=slot_limit,
+        specialization=specialization
+    )
     return {
         "status": "success",
-        "count": len(doctors),
-        "doctors": [
-            {
-                "id": d.id,
-                "name": d.name,
-                "department": d.department,
-                "specialization": d.specialization,
-                "experience": d.experience,
-                "available_slots": d.slots,
-                "available_slots_count": len(d.slots)
-            } for d in doctors
-        ]
+        "count": len(doctors_data),
+        "doctors": doctors_data
+    }
+
+@router.get("/doctors/{doctor_id}")
+def get_doctor(
+    doctor_id: str,
+    include_slots: bool = True,
+    slot_limit: int = 20,
+    db: Session = Depends(get_db)
+):
+    """Get specific doctor details and available slots."""
+    service = DoctorService(db)
+    doctor = service.get_doctor_by_id(doctor_id, include_slots=include_slots, slot_limit=slot_limit)
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return {
+        "status": "success",
+        "doctor": doctor
     }
 
 @router.get("/available-slots")
-def get_available_slots(department: Optional[str] = None, db: Session = Depends(get_db)):
-    """Get available slots."""
+def get_available_slots(
+    department: Optional[str] = None,
+    slot_limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    """Get available slots by department."""
     service = DoctorService(db)
-    result_doctors = service.get_available_slots(department)
+    result_doctors = service.get_available_slots(department, slot_limit=slot_limit)
 
     return {
         "status": "success",

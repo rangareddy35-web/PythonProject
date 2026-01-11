@@ -36,6 +36,9 @@ class DoctorRepository(BaseRepository):
             Doctor.is_active == True
         ).all()
 
-    def get_all_active(self) -> List[Doctor]:
-        """Get all active doctors"""
-        return self.db.query(Doctor).filter(Doctor.is_active == True).all()
+    def get_all_active(self, specialization: Optional[str] = None) -> List[Doctor]:
+        """Get all active doctors, optionally filtered by specialization"""
+        query = self.db.query(Doctor).filter(Doctor.is_active == True)
+        if specialization:
+            query = query.filter(Doctor.specialization.ilike(f"%{specialization}%"))
+        return query.all()
