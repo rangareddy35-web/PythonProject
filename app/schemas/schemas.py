@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import List, Optional, Any
 from datetime import date, datetime, time
 import uuid
 
@@ -53,9 +53,9 @@ class AppointmentRequest(BaseModel):
     @classmethod
     def validate_dob(cls, v):
         try:
-            datetime.fromisoformat(v)
+            datetime.strptime(v, "%Y-%m-%d")
             return v
-        except Exception:
+        except ValueError:
             raise ValueError("dob must be in ISO format YYYY-MM-DD")
 
     @field_validator("requested_datetime")
@@ -64,5 +64,16 @@ class AppointmentRequest(BaseModel):
         try:
             datetime.fromisoformat(v)
             return v
-        except Exception:
+        except ValueError:
             raise ValueError("requested_datetime must be a valid ISO 8601 datetime string")
+
+    @model_validator(mode='before')
+    @classmethod
+    def unwrap_retell_args(cls, data: Any) -> Any:
+        """
+        Retell AI sends function arguments wrapped in an 'args' dictionary.
+        This validator unwraps it so the model can validate the inner fields.
+        """
+        if isinstance(data, dict) and "args" in data:
+            return data["args"]
+        return data
