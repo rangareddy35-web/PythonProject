@@ -26,9 +26,6 @@ class DoctorService:
 
     def _format_doctor(self, doc, include_slots: bool, slot_limit: int) -> dict:
         """Helper to format doctor data"""
-        from datetime import date
-        today = date.today()
-        
         doc_data = {
             "id": doc.id,
             "name": doc.name,
@@ -37,13 +34,8 @@ class DoctorService:
             "experience": doc.experience,
         }
         
-        # Filter (available + today/future) and sort by date and time
-        avail_slots = [
-            s for s in doc.slots 
-            if s.status == "available" and s.date >= today
-        ]
-        avail_slots.sort(key=lambda x: (x.date, x.time))
-        
+        # Filter and count available slots
+        avail_slots = [s for s in doc.slots if s.status == "available"]
         doc_data["available_slots_count"] = len(avail_slots)
         
         if include_slots:
@@ -53,9 +45,6 @@ class DoctorService:
 
     def get_available_slots(self, department: Optional[str] = None, slot_limit: int = 10):
         """Get available slots logic with limiting"""
-        from datetime import date
-        today = date.today()
-        
         if department:
             doctors = self.doctor_repo.get_by_department(department)
         else:
@@ -63,13 +52,7 @@ class DoctorService:
         
         result_doctors = []
         for doc in doctors:
-            # Filter (available + today/future) and sort by date and time
-            avail_slots = [
-                s for s in doc.slots 
-                if s.status == "available" and s.date >= today
-            ]
-            avail_slots.sort(key=lambda x: (x.date, x.time))
-            
+            avail_slots = [s for s in doc.slots if s.status == "available"]
             if avail_slots:
                 result_doctors.append({
                     "id": doc.id,
